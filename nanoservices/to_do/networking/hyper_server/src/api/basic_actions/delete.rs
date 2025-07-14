@@ -7,6 +7,10 @@ use to_do_core::api::basic_actions::{
     get::get_all as get_all_core
 };
 use http_body_util::Full;
+use to_do_dal::to_do_items::transactions::{
+    delete::DeleteOne,
+    get::GetAll
+};
 
 
 /// Deletes a task by name.
@@ -16,10 +20,10 @@ use http_body_util::Full;
 /// 
 /// # Returns
 /// A `Response` with a body containing all the to-do items.
-pub async fn delete_by_name(name: &str) -> Result<Response<Full<Bytes>>, NanoServiceError> {
-    let _ = delete_core(name).await?;
+pub async fn delete_by_name<T: DeleteOne + GetAll>(name: &str) -> Result<Response<Full<Bytes>>, NanoServiceError> {
+    let _ = delete_core::<T>(name).await?;
     let json_body = safe_eject!(
-        serde_json::to_string(&get_all_core().await?),
+        serde_json::to_string(&get_all_core::<T>().await?),
         NanoServiceErrorStatus::Unknown
     )?;
     safe_eject!(

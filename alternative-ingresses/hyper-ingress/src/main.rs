@@ -12,6 +12,7 @@ use rust_embed::RustEmbed;
 use std::path::Path;
 use mime_guess;
 use glue::errors::{NanoServiceError, NanoServiceErrorStatus};
+use to_do_dal::migrations::run_migrations;
 
 
 #[derive(RustEmbed)]
@@ -101,6 +102,7 @@ async fn catch_all(path: &str) -> Response<Full<Bytes>> {
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+    run_migrations().await;
     let addr = SocketAddr::from(([0, 0, 0, 0], 8001));
     let listener = TcpListener::bind(addr).await?;
     loop {

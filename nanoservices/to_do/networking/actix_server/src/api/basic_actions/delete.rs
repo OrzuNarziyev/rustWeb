@@ -10,6 +10,10 @@ use glue::errors::{
     NanoServiceError,
     NanoServiceErrorStatus
 };
+use to_do_dal::to_do_items::transactions::{
+    delete::DeleteOne,
+    get::GetAll
+};
 
 
 /// Deletes an item from the to-do list by name.
@@ -19,10 +23,11 @@ use glue::errors::{
 /// 
 /// # Returns
 /// All of the items in the to-do list.
-pub async fn delete_by_name(req: HttpRequest) -> Result<HttpResponse, NanoServiceError> {
+pub async fn delete_by_name<T: DeleteOne + GetAll>(req: HttpRequest) 
+    -> Result<HttpResponse, NanoServiceError> {
     match req.match_info().get("name") {
         Some(name) => {
-            delete_core(name).await?;
+            delete_core::<T>(name).await?;
         },
         None => {
             return Err(
@@ -33,5 +38,6 @@ pub async fn delete_by_name(req: HttpRequest) -> Result<HttpResponse, NanoServic
             )
         }
     };
-    Ok(HttpResponse::Ok().json(get_all_core().await?))
+    Ok(HttpResponse::Ok().json(get_all_core::<T>().await?))
 }
+

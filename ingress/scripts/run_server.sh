@@ -11,4 +11,5 @@ npm install
 npm run build
 cd ../ingress
 cargo clean
+export $(cat .env | xargs)
 cargo run

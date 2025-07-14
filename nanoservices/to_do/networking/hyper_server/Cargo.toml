@@ -13,3 +13,4 @@ bytes = "1.7.1"
 to-do-core = { path = "../../core" }
 glue = { path = "../../../../glue", features = ["hyper"] }
 serde = { version = "1.0.197", features = ["derive"] }
+to-do-dal = { path = "../../dal", features = ["sqlx-postgres"]}

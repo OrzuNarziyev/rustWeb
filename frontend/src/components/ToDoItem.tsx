@@ -10,33 +10,26 @@ interface ToDoItemProps {
     status: string;
     id: number;
     passBackResponse: (response: any) => void;
+    buttonMessage: string;
 }
 
 
 export const ToDoItem: React.FC<ToDoItemProps> = (
-    { title, status, id, passBackResponse }) => {
-    const [itemTitle, setTitle] = useState<string>(title);
-    const [button, setButton] = useState<string>('');
-
-    useEffect(() => {
-        const processStatus = (status: string): string => {
-            return status === "PENDING" ? "edit" : "delete";
-        };
-        setButton(processStatus(status));
-    }, [status]);
+    { title, status, id, passBackResponse, buttonMessage  }) => {
 
     const sendRequest = async () => {
-        if (button === "edit") {
+        if (buttonMessage === "edit") {
             await updateToDoItemCall(
-                itemTitle,
-                TaskStatus.DONE
+                title,
+                TaskStatus.DONE,
+                id
             ).then(
                 response => {
                     passBackResponse(response);
                 }
             )            
         } else {
-            await deleteToDoItemCall(itemTitle).then(
+            await deleteToDoItemCall(title).then(
                 response => {
                     passBackResponse(response);
                 }
@@ -46,10 +39,10 @@ export const ToDoItem: React.FC<ToDoItemProps> = (
     
     return (
         <div className="itemContainer" id={id}>
-            <p>{itemTitle}</p>
+            <p>{title}</p>
             <button className="actionButton" 
                     onClick={sendRequest}>
-                {button}
+                {buttonMessage}
             </button>
         </div>
     );    
