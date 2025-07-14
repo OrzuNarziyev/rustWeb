@@ -7,8 +7,12 @@ use to_do_core::api::basic_actions::{
 use http_body_util::Full;
 use hyper::body::Bytes;
 use hyper::{header, Response, Request, body::Incoming};
-use to_do_core::structs::ToDoItem;
+use to_do_dal::to_do_items::schema::NewToDoItem;
 use glue::hyper_utils::extract_body::extract_body;
+use to_do_dal::to_do_items::transactions::{
+    create::SaveOne,
+    get::GetAll
+};
 
 
 /// Creates an item in the to-do list.
@@ -18,11 +22,11 @@ use glue::hyper_utils::extract_body::extract_body;
 /// 
 /// # Returns
 /// All of the items in the to-do list.
-pub async fn create(req: Request<Incoming>) -> Result<Response<Full<Bytes>>, NanoServiceError> {
-    let todo_item = extract_body::<ToDoItem>(req).await?;
-    create_core(todo_item).await?;
+pub async fn create<T: SaveOne + GetAll>(req: Request<Incoming>) -> Result<Response<Full<Bytes>>, NanoServiceError> {
+    let todo_item = extract_body::<NewToDoItem>(req).await?;
+    create_core::<T>(todo_item).await?;
     let json_body = safe_eject!(
-        serde_json::to_string(&get_all_core().await?),
+        serde_json::to_string(&get_all_core::<T>().await?),
         NanoServiceErrorStatus::Unknown
     )?;
     safe_eject!(

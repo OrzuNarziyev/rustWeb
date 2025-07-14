@@ -10,6 +10,7 @@ use rocket::response;
 use rocket::Request;
 use std::marker::PhantomData;
 use std::net::Ipv4Addr;
+use to_do_dal::migrations::run_migrations;
 
 use rocket::http::Header;
 use rocket::fairing::{Fairing, Info, Kind};
@@ -68,6 +69,7 @@ async fn serve_frontend_asset<'r>(path: PathBuf) -> Result<CustomResponder<'r>, 
 
 #[catch(404)]
 async fn catch_all<'r>(req: &rocket::Request<'_>) -> Result<CustomResponder<'r>, Status> {
+    run_migrations().await;
     let path = req.uri().path().to_string();
     
     if path.contains("/api/") {

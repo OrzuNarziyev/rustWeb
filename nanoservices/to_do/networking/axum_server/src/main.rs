@@ -3,10 +3,12 @@ use axum::routing::Router;
 use std::net::SocketAddr;
 use tokio::main;
 mod api;
+use to_do_dal::migrations::run_migrations;
 
 
 #[main]
 async fn main() {
+    run_migrations().await;
     // Build our application with a route
     let app = Router::new();
     let app = api::views_factory(app);

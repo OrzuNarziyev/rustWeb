@@ -13,7 +13,6 @@ use rocket::Route;
 pub fn basic_actions_factory() -> Vec<Route> {
     routes![
         get::get_all, 
-        get::get_by_name, 
         create::create, 
         delete::delete_by_name,
         update::update

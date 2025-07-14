@@ -10,6 +10,8 @@ use tokio::net::TcpListener;
 use http_body_util::Full;
 use glue::hyper_utils::extract_header::extract_token;
 use glue::extract_hyper_header_token;
+use to_do_dal::to_do_items::descriptors::SqlxPostGresDescriptor;
+use to_do_dal::migrations::run_migrations;
 
 mod api;
 
@@ -23,6 +25,8 @@ mod api;
 /// A `Result` containing the response to the request or an error
 async fn handle(req: Request<hyper::body::Incoming>) 
     -> Result<Response<Full<Bytes>>, Infallible> {
+
+    run_migrations().await;
     
     let path = req.uri().path();
     // Split the path into segments
@@ -31,25 +35,20 @@ async fn handle(req: Request<hyper::body::Incoming>)
     // Match the path to extract `name` for "/api/v1/get/<name>"
     let response = match (req.method(), segments.as_slice()) {
         (&Method::GET, ["api", "v1", "get", "all"]) => {
-            api::basic_actions::get::get_all().await
-        }
-        // Example: match the "/api/v1/get/<name>" path
-        (&Method::GET, ["api", "v1", "get", name]) => {
-            // Here `name` is the extracted name segment from the URL
-            api::basic_actions::get::get_by_name(name).await
+            api::basic_actions::get::get_all::<SqlxPostGresDescriptor>().await
         }
         (&Method::POST, ["api", "v1", "create"]) => {
             // Extract and parse the JSON body
-            api::basic_actions::create::create(req).await
+            api::basic_actions::create::create::<SqlxPostGresDescriptor>(req).await
         }
         (&Method::PATCH, ["api", "v1", "update"]) => {
             let token = extract_hyper_header_token!(&req);
             // Extract and parse the JSON body
-            api::basic_actions::update::update(req, token).await
+            api::basic_actions::update::update::<SqlxPostGresDescriptor>(req, token).await
         }
         (&Method::DELETE, ["api", "v1", "delete", name]) => {
             // Here `name` is the extracted name segment from the URL
-            api::basic_actions::delete::delete_by_name(name).await
+            api::basic_actions::delete::delete_by_name::<SqlxPostGresDescriptor>(name).await
         }
         _ => Ok(not_found()),
     };
